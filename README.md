@@ -44,3 +44,30 @@ This work is licensed under a
 [cc-by-sa]: http://creativecommons.org/licenses/by-sa/4.0/
 [cc-by-sa-image]: https://licensebuttons.net/l/by-sa/4.0/88x31.png
 [cc-by-sa-shield]: https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey.svg
+
+My Additions
+Rubric points
+
+README
+## Loops, Functions, I/O
+The project demonstrates an understanding of C++ functions and control structures : see "Controller.cpp", "Game.cpp" or "Snake.cpp".
+The project accepts user input and processes the input : see "Controller.cpp" method "HandleInput" & "HandleInputPlayer2".
+## Object Oriented Programming
+The project uses Object Oriented Programming techniques : Snake Class, Game Class and Controller Class and their comunications.
+Classes use appropriate access specifiers for class member : all members & functions are using the appropriate specifiers.
+Class constructors utilize member initialization lists : Snake constructor in "Snake.h" for example.
+Classes encapsulate behavior : all methods for a snake object are in Snake class for example.
+## Memory Management
+The project makes use of references in function declarations : see "Game.h" Line 14 (Run method) & "Controller.h" Line 8&9.
+The project uses destructors appropriately.
+
+
+## Concurrency
+The project uses multithreading : see "Game.cpp" Line 29&30 (Run method)
+the game now has 2 players that work togather to reach the highest score, the rules are:
+
+--> the score is incremented if either of the players got ate a food (1 food = 1 point)
+--> if a snake collides with another they both die.---
+--> if a snake collides with its body it dies.
+---> if either of the snakes dies the game is over.
+

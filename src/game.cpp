@@ -4,14 +4,21 @@
 
 Game::Game(std::size_t grid_width, std::size_t grid_height)
     : snake(grid_width, grid_height),
+      snake2(grid_width, grid_height),
       engine(dev()),
-      random_w(0, static_cast<int>(grid_width - 1)),
-      random_h(0, static_cast<int>(grid_height - 1)) {
-  PlaceFood();
-}
+      random_w(0, static_cast<int>(grid_width)),
+      random_h(0, static_cast<int>(grid_height)) 
+      {
+       snake.SetPosition(random_w(engine), random_w(engine));
+       snake2.SetPosition(random_w(engine), random_w(engine));
+       PlaceFood();
+      }
 
-void Game::Run(Controller const &controller, Renderer &renderer,
-               std::size_t target_frame_duration) {
+/*void Game::Run(Controller const &controller, Renderer &renderer,
+               std::size_t target_frame_duration)*/
+void Game::Run(Renderer &renderer,
+    std::size_t target_frame_duration)
+              {
   Uint32 title_timestamp = SDL_GetTicks();
   Uint32 frame_start;
   Uint32 frame_end;
@@ -19,13 +26,21 @@ void Game::Run(Controller const &controller, Renderer &renderer,
   int frame_count = 0;
   bool running = true;
 
+  Controller player_1_controller(SDLK_UP, SDLK_DOWN, SDLK_RIGHT, SDLK_LEFT);
+  Controller player_2_controller(SDLK_w, SDLK_s, SDLK_d, SDLK_a);
+
   while (running) {
     frame_start = SDL_GetTicks();
 
     // Input, Update, Render - the main game loop.
-    controller.HandleInput(running, snake);
-    Update();
-    renderer.Render(snake, food);
+    //controller.HandleInput(running, snake);
+    std::thread player1Input(&Controller::HandleInput, player_1_controller, std::ref(running), std::ref(snake));
+    std::thread player2Input(&Controller::HandleInput, player_2_controller, std::ref(running), std::ref(snake2));
+    player1Input.join();
+    player2Input.join();
+    snake.Update(snake2);
+    snake2.Update(snake);
+    renderer.Render(snake, snake2, food);
 
     frame_end = SDL_GetTicks();
 
@@ -57,7 +72,7 @@ void Game::PlaceFood() {
     y = random_h(engine);
     // Check that the location is not occupied by a snake item before placing
     // food.
-    if (!snake.SnakeCell(x, y)) {
+    if (!snake.SnakeCell(x, y) && !snake2.SnakeCell(x, y)) {
       food.x = x;
       food.y = y;
       return;
@@ -66,13 +81,17 @@ void Game::PlaceFood() {
 }
 
 void Game::Update() {
-  if (!snake.alive) return;
+  if (!snake.alive || !snake2.alive) return;
 
-  snake.Update();
+  snake.Update(snake2);
+  snake2.Update(snake);
 
   int new_x = static_cast<int>(snake.head_x);
   int new_y = static_cast<int>(snake.head_y);
 
+
+  int new_x_player2 = static_cast<int>(snake2.head_x);
+  int new_y_player2 = static_cast<int>(snake2.head_y);
   // Check if there's food over here
   if (food.x == new_x && food.y == new_y) {
     score++;
@@ -80,6 +99,13 @@ void Game::Update() {
     // Grow snake and increase speed.
     snake.GrowBody();
     snake.speed += 0.02;
+  }
+    if (food.x == new_x_player2 && food.y == new_y_player2) {
+    score++;
+    PlaceFood();
+    // Grow snake and increase speed.
+    snake2.GrowBody();
+    snake2.speed += 0.02;
   }
 }
 
